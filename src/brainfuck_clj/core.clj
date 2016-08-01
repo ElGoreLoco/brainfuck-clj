@@ -59,6 +59,7 @@
   (let [cells (:cells cell-data)
         data-pointer (:data-pointer cell-data)]
     (print (char (get cells data-pointer)))
+    (flush) ; If the program doesn't flush the output stream, characters will be displayed every once in a while.
     cell-data))
 
 (defn- str->number
