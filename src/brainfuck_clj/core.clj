@@ -158,7 +158,7 @@
 (defn str->instructions
   "Takes a string and returns a list with all of the valid characters."
   [s]
-  (filter valid-command? (seq s)))
+  (vec (filter valid-command? (seq s))))
 
 (defn str->program-data
   [s]
