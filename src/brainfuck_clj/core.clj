@@ -173,4 +173,9 @@
 
 (defn -main
   [& args]
-  (run-all-instructions (str->program-data (slurp (first args)))))
+  (if (= 1 (count args))
+    (-> (first args)
+        slurp
+        str->program-data
+        run-all-instructions)
+    (println "You should specify a filepath.")))
