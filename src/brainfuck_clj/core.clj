@@ -188,12 +188,11 @@
 
       ;; Print the cells state every 0.5s
       (future
-        (do
-          (dosync
-            (println (:cells (:cell-data @program-data-ref))))
-          (when (not @program-terminated)
-            (Thread/sleep 500)
-            (recur))))
+        (dosync
+          (println (:cells (:cell-data @program-data))))
+        (when (not @program-terminated)
+          (Thread/sleep 500)
+          (recur)))
 
       ;; Begin interpreter
       (run-all-instructions))
