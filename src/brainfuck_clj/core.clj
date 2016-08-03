@@ -2,9 +2,9 @@
   (:require [clojure.set])
   (:gen-class))
 
-;;;;
+;;;; Mutable data
 
-(def program-data-ref (ref nil))
+(def program-data (ref nil))
 (def program-terminated (agent false))
 
 ;;;; Cell data
@@ -184,7 +184,8 @@
   (if (= 1 (count args))
     (do
       ;; Setup program-data
-      (dosync (ref-set program-data-ref (str->program-data (slurp (first args)))))
+      (dosync (ref-set program-data
+                       (str->program-data (slurp (first args)))))
 
       ;; Print the cells state every 0.5s
       (future
