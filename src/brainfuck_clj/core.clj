@@ -2,6 +2,11 @@
   (:require [clojure.set])
   (:gen-class))
 
+;;;;
+
+(def program-data-ref (ref nil))
+(def program-terminated (agent false))
+
 ;;;; Cell data
 
 (defn create-cell-data
@@ -115,12 +120,15 @@
         program-data))))
 
 (defn run-all-instructions
-  [program-data]
+  []
   (println "Started execution")
-  (loop [program-data program-data]
-    (if (< (:instruction-pointer program-data) (count (:instructions program-data)))
-      (recur (run-instruction program-data))
-      program-data)))
+  (loop []
+    (dosync
+      (if (< (:instruction-pointer @program-data-ref) (count (:instructions @program-data-ref)))
+        (alter program-data-ref run-instruction)
+        (send program-terminated (fn [a] true))))
+    (if (not @program-terminated)
+      (recur))))
 
 ;;;; Loops
 
@@ -174,8 +182,20 @@
 (defn -main
   [& args]
   (if (= 1 (count args))
-    (-> (first args)
-        slurp
-        str->program-data
-        run-all-instructions)
-    (println "You should specify a filepath.")))
+    (do
+      ;; Setup program-data
+      (dosync (ref-set program-data-ref (str->program-data (slurp (first args)))))
+
+      ;; Print the cells state every 0.5s
+      (future
+        (do
+          (dosync
+            (println (:cells (:cell-data @program-data-ref))))
+          (when (not @program-terminated)
+            (Thread/sleep 500)
+            (recur))))
+
+      ;; Begin interpreter
+      (run-all-instructions))
+    (println "You should specify a filepath."))
+  (shutdown-agents))
