@@ -1,6 +1,7 @@
 (ns brainfuck-clj.core
   (:require [brainfuck-clj.interpreter :as interpreter]
-            [brainfuck-clj.ui :as ui])
+            [brainfuck-clj.ui :as ui]
+            [brainfuck-clj.actions :as a])
   (:gen-class))
 
 ;;;; Mutable data
@@ -14,13 +15,8 @@
   [& args]
   (if (= 1 (count args))
     (do
-      ;; Setup program-data
-      (dosync (ref-set program-data
-                       (interpreter/str->program-data (slurp (first args)))))
-
+      (a/setup-program-data program-data (slurp (first args)))
       (ui/make-ui program-data program-paused)
-
-      ;; Begin interpreter
       (interpreter/run-all-instructions program-data program-paused))
     (println "You should specify a filepath."))
   (shutdown-agents))
