@@ -6,7 +6,7 @@
 ;;;; Mutable data
 
 (def program-data (ref nil))
-(def program-terminated (agent false))
+(def program-paused (agent false))
 
 ;;;; Main
 
@@ -18,9 +18,9 @@
       (dosync (ref-set program-data
                        (interpreter/str->program-data (slurp (first args)))))
 
-      (ui/make-ui program-data program-terminated)
+      (ui/make-ui program-data program-paused)
 
       ;; Begin interpreter
-      (interpreter/run-all-instructions program-data program-terminated))
+      (interpreter/run-all-instructions program-data program-paused))
     (println "You should specify a filepath."))
   (shutdown-agents))

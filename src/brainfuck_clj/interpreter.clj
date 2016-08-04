@@ -115,19 +115,17 @@
         program-data))))
 
 (defn run-all-instructions
-  [program-data-ref program-terminated]
+  [program-data-ref program-paused]
   (println "Started execution")
   (loop []
-    ;; Run instruction
-    (dosync
-      (if (< (:instruction-pointer @program-data-ref)
-             (count (:instructions @program-data-ref)))
-        (alter program-data-ref run-instruction)
-        (if (not @program-terminated) ; This is for not sending useless actions.
-          (send program-terminated (fn [a] true)))))
-    ;; Check if program is finished
-    (if (not @program-terminated)
-      (recur))))
+    (if (not @program-paused)
+      (dosync
+        (if (< (:instruction-pointer @program-data-ref)
+               (count (:instructions @program-data-ref)))
+          (alter program-data-ref run-instruction)
+          (if (not @program-paused) ; This is for not sending useless actions.
+            (send program-paused (fn [a] true))))))
+    (recur)))
 
 ;;;; Loops
 

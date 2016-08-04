@@ -1,8 +1,9 @@
 (ns brainfuck-clj.ui
+  (:require [brainfuck-clj.actions :as a])
   (:use [seesaw.core]))
 
 (defn make-ui
-  [program-data program-terminated]
+  [program-data program-paused]
   (native!)
   (def f
     (frame
@@ -26,8 +27,10 @@
                                              (button :text ",")]
                                      :align :left)
                                    (flow-panel
-                                     :items [(button :text "Run")
-                                             (button :text "Stop")
+                                     :items [(button :text "Run"
+                                                     :listen [:action (fn [_] (a/set-agent program-paused false))])
+                                             (button :text "Stop"
+                                                     :listen [:action (fn [_] (a/set-agent program-paused true))])
                                              (button :text "Reload")]
                                      :align :right)])
                          (scrollable
