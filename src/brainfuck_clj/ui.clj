@@ -65,6 +65,12 @@
                                              (button :text "Reload"
                                                      :listen [:action on-reload])]
                                      :align :right)])
+                         (flow-panel
+                           :items [(label "Instruction pointer:")
+                                   (label :text "" :id :instruction-pointer)
+                                   (label "Data pointer:")
+                                   (label :text "" :id :data-pointer)]
+                           :align :left)
                          (scrollable
                            (label :text "" :id :cells)
                            :hscroll :always
@@ -80,6 +86,9 @@
     (loop []
       (Thread/sleep 100)
       (let [program-data @program-data
-            cells (:cells (:cell-data program-data))]
-        (config! (select f [:#cells]) :text (str cells)))
+            {:keys [instruction-pointer cell-data]} program-data
+            {:keys [cells data-pointer]} cell-data]
+        (config! (select f [:#cells]) :text (str cells))
+        (config! (select f [:#instruction-pointer]) :text (str instruction-pointer))
+        (config! (select f [:#data-pointer]) :text (str data-pointer)))
       (recur))))
