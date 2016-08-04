@@ -123,7 +123,8 @@
                (count (:instructions @program-data-ref)))
           (alter program-data-ref run-instruction)
           (if (not @program-paused) ; This is for not sending useless actions.
-            (send program-paused (fn [a] true))))))
+            (send program-paused (fn [a] true)))))
+      (Thread/sleep 250))
     (recur)))
 
 ;;;; Loops
