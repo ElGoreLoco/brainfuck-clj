@@ -1,5 +1,6 @@
 (ns brainfuck-clj.ui
-  (:require [brainfuck-clj.actions :as a])
+  (:require [brainfuck-clj.actions :as a]
+            [brainfuck-clj.interpreter :as interpreter])
   (:use [seesaw.core]))
 
 (defn make-ui
@@ -18,6 +19,14 @@
         (a/setup-program-data program-data (apply str (:instructions @program-data))))
       (alert "The interpreter must be paused to be able to reload the program.")))
 
+  (defn on-instruction [button]
+    (dosync
+      (->> (config button :text)
+           seq
+           first
+           char
+           (alter program-data interpreter/run-given-instruction))))
+
   (native!)
   (def f
     (frame
@@ -31,14 +40,22 @@
                            :editable? false)
                          (horizontal-panel
                            :items [(flow-panel
-                                     :items [(button :text "+")
-                                             (button :text "-")
-                                             (button :text ">")
-                                             (button :text "<")
-                                             (button :text "[")
-                                             (button :text "]")
-                                             (button :text ".")
-                                             (button :text ",")]
+                                     :items [(button :text "+"
+                                                     :listen [:action on-instruction])
+                                             (button :text "-"
+                                                     :listen [:action on-instruction])
+                                             (button :text ">"
+                                                     :listen [:action on-instruction])
+                                             (button :text "<"
+                                                     :listen [:action on-instruction])
+                                             (button :text "["
+                                                     :listen [:action on-instruction])
+                                             (button :text "]"
+                                                     :listen [:action on-instruction])
+                                             (button :text "."
+                                                     :listen [:action on-instruction])
+                                             (button :text ","
+                                                     :listen [:action on-instruction])]
                                      :align :left)
                                    (flow-panel
                                      :items [(button :text "Run"
