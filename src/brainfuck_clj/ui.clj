@@ -31,7 +31,15 @@
                                                      :listen [:action (fn [_] (a/set-agent program-paused false))])
                                              (button :text "Stop"
                                                      :listen [:action (fn [_] (a/set-agent program-paused true))])
-                                             (button :text "Reload")]
+                                             (button :text "Reload"
+                                                     :listen [:action (fn [_]
+                                                                        (if @program-paused
+                                                                          (do
+                                                                            (println)
+                                                                            (a/setup-program-data
+                                                                              program-data
+                                                                              (apply str (:instructions @program-data))))
+                                                                          (alert "The interpreter must be paused to be able to reload the program.")))])]
                                      :align :right)])
                          (scrollable
                            (label :text "" :id :cells)
