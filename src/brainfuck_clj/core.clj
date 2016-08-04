@@ -7,7 +7,7 @@
 ;;;; Mutable data
 
 (def program-data (ref nil))
-(def program-paused (agent false))
+(def program-paused (agent true))
 
 ;;;; Main
 

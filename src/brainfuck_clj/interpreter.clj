@@ -116,7 +116,6 @@
 
 (defn run-all-instructions
   [program-data-ref program-paused]
-  (println "Started execution")
   (loop []
     (if (not @program-paused)
       (dosync
