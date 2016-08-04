@@ -6,6 +6,8 @@
 (defn make-ui
   [program-data program-paused]
 
+  (declare f)
+
   (defn on-run [_]
     (a/set-agent program-paused false))
 
@@ -16,7 +18,7 @@
     (if @program-paused
       (do
         (println) ; FIXME: this will be replaced with cleaning the gui buffer.
-        (a/setup-program-data program-data (apply str (:instructions @program-data))))
+        (a/setup-program-data program-data (config (select f [:#editor]) :text)))
       (alert "The interpreter must be paused to be able to reload the program.")))
 
   (defn on-instruction [button]
@@ -75,10 +77,15 @@
                            (label :text "" :id :cells)
                            :hscroll :always
                            :vscroll :never)
-                         (text
-                           :text ""
-                           :multi-line? true
-                           :editable? true)])))
+                         (scrollable
+                           (text
+                             :text (apply str (:instructions @program-data))
+                             :id :editor
+                             :multi-line? true
+                             :wrap-lines? true
+                             :editable? true)
+                           :hscroll :never
+                           :vscroll :always)])))
 
   (-> f pack!  show!)
 
