@@ -90,29 +90,34 @@
   [program-data f]
   (merge program-data {:cell-data (f (:cell-data program-data))}))
 
-(defn run-instruction
+(defn run-given-instruction
+  [program-data instruction]
+  (let [{:keys [instructions instruction-pointer loops cell-data]} program-data]
+    (case instruction
+      \+ (edit-cell-data program-data inc-cell)
+      \- (edit-cell-data program-data dec-cell)
+      \> (edit-cell-data program-data move-right)
+      \< (edit-cell-data program-data move-left)
+      \[ (if (= (get-cell-value cell-data) 0)
+           (move-instruction-pointer
+             program-data
+             (get loops instruction-pointer))
+           program-data)
+      \] (if (not= (get-cell-value cell-data) 0)
+           (move-instruction-pointer
+             program-data
+             (get (clojure.set/map-invert loops) instruction-pointer))
+           program-data)
+      \. (do (output-cell cell-data) program-data)
+      \, (merge program-data {:cell-data (input-cell cell-data)})
+      program-data)))
+
+(defn run-next-instruction
   [program-data]
-  (let [{:keys [instructions instruction-pointer loops cell-data]} program-data
+  (let [{:keys [instructions instruction-pointer]} program-data
         current-instruction (nth instructions instruction-pointer)]
     (inc-instruction-pointer
-      (case current-instruction
-        \+ (edit-cell-data program-data inc-cell)
-        \- (edit-cell-data program-data dec-cell)
-        \> (edit-cell-data program-data move-right)
-        \< (edit-cell-data program-data move-left)
-        \[ (if (= (get-cell-value cell-data) 0)
-             (move-instruction-pointer
-               program-data
-               (get loops instruction-pointer))
-             program-data)
-        \] (if (not= (get-cell-value cell-data) 0)
-             (move-instruction-pointer
-               program-data
-               (get (clojure.set/map-invert loops) instruction-pointer))
-             program-data)
-        \. (do (output-cell cell-data) program-data)
-        \, (merge program-data {:cell-data (input-cell cell-data)})
-        program-data))))
+      (run-given-instruction program-data current-instruction))))
 
 (defn run-all-instructions
   [program-data-ref program-paused]
@@ -121,7 +126,7 @@
       (dosync
         (if (< (:instruction-pointer @program-data-ref)
                (count (:instructions @program-data-ref)))
-          (alter program-data-ref run-instruction)
+          (alter program-data-ref run-next-instruction)
           (if (not @program-paused) ; This is for not sending useless actions.
             (send program-paused (fn [a] true)))))
       (Thread/sleep 250))
