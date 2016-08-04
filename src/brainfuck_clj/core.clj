@@ -1,5 +1,6 @@
 (ns brainfuck-clj.core
-  (:require [brainfuck-clj.interpreter :as interpreter])
+  (:require [brainfuck-clj.interpreter :as interpreter]
+            [brainfuck-clj.ui :as ui])
   (:gen-class))
 
 ;;;; Mutable data
@@ -17,13 +18,7 @@
       (dosync (ref-set program-data
                        (interpreter/str->program-data (slurp (first args)))))
 
-      ;; Print the cells state every 0.5s
-      (future
-        (dosync
-          (println (:cells (:cell-data @program-data))))
-        (when (not @program-terminated)
-          (Thread/sleep 500)
-          (recur)))
+      (ui/make-ui program-data program-terminated)
 
       ;; Begin interpreter
       (interpreter/run-all-instructions program-data program-terminated))
