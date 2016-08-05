@@ -33,63 +33,69 @@
   (def f
     (frame
       :title "brainfuck-clj"
-      :size [640 :by 480]
+      :size [1280 :by 720]
       :on-close :exit
-      :content (vertical-panel
-                 :items [(scrollable
-                           (text
-                             :text ""
-                             :id :buffer
-                             :multi-line? true
-                             :editable? false))
-                         (horizontal-panel
-                           :items [(flow-panel
-                                     :items [(button :text "+"
-                                                     :listen [:action on-instruction])
-                                             (button :text "-"
-                                                     :listen [:action on-instruction])
-                                             (button :text ">"
-                                                     :listen [:action on-instruction])
-                                             (button :text "<"
-                                                     :listen [:action on-instruction])
-                                             (button :text "["
-                                                     :listen [:action on-instruction])
-                                             (button :text "]"
-                                                     :listen [:action on-instruction])
-                                             (button :text "."
-                                                     :listen [:action on-instruction])
-                                             (button :text ","
-                                                     :listen [:action on-instruction])]
-                                     :align :left)
-                                   (flow-panel
-                                     :items [(button :text "Run"
-                                                     :listen [:action on-run])
-                                             (button :text "Stop"
-                                                     :listen [:action on-stop])
-                                             (button :text "Reload"
-                                                     :listen [:action on-reload])]
-                                     :align :right)])
-                         (flow-panel
-                           :items [(label "Instruction pointer:")
-                                   (label :text "" :id :instruction-pointer)
-                                   (label "Data pointer:")
-                                   (label :text "" :id :data-pointer)]
-                           :align :left)
-                         (scrollable
-                           (label :text "" :id :cells)
-                           :hscroll :always
-                           :vscroll :never)
-                         (scrollable
-                           (text
-                             :text (apply str (:instructions @program-data))
-                             :id :editor
-                             :multi-line? true
-                             :wrap-lines? true
-                             :editable? true)
-                           :hscroll :never
-                           :vscroll :always)])))
+      :content (top-bottom-split
+                 (scrollable
+                   (text
+                     :text ""
+                     :id :buffer
+                     :multi-line? true
+                     :editable? false))
+                 (top-bottom-split
+                   (vertical-panel
+                     :items [(horizontal-panel
+                               :items [(flow-panel
+                                         :items [(button :text "+"
+                                                         :listen [:action on-instruction])
+                                                 (button :text "-"
+                                                         :listen [:action on-instruction])
+                                                 (button :text ">"
+                                                         :listen [:action on-instruction])
+                                                 (button :text "<"
+                                                         :listen [:action on-instruction])
+                                                 (button :text "["
+                                                         :listen [:action on-instruction])
+                                                 (button :text "]"
+                                                         :listen [:action on-instruction])
+                                                 (button :text "."
+                                                         :listen [:action on-instruction])
+                                                 (button :text ","
+                                                         :listen [:action on-instruction])]
+                                         :align :left)
+                                       (flow-panel
+                                         :items [(button :text "Run"
+                                                         :listen [:action on-run])
+                                                 (button :text "Stop"
+                                                         :listen [:action on-stop])
+                                                 (button :text "Reload"
+                                                         :listen [:action on-reload])]
+                                         :align :right)])
+                             (flow-panel
+                               :items [(label "Instruction pointer:")
+                                       (label :text "" :id :instruction-pointer)
+                                       (label "Data pointer:")
+                                       (label :text "" :id :data-pointer)]
+                               :align :left)
+                             (scrollable
+                               (label :text "" :id :cells)
+                               :hscroll :always
+                               :vscroll :never)])
+                   (scrollable
+                     (text
+                       :text (apply str (:instructions @program-data))
+                       :id :editor
+                       :multi-line? true
+                       :wrap-lines? true
+                       :editable? true)
+                     :hscroll :never
+                     :vscroll :always)
+                   :divider-location 0.2
+                   :divider-size -1)
+                 :divider-location 0.5
+                 :divider-size 10)))
 
-  (-> f pack!  show!)
+  (-> f show!)
 
   (future
     (loop []
@@ -100,5 +106,6 @@
         (config! (select f [:#cells]) :text (str cells))
         (config! (select f [:#instruction-pointer]) :text (str instruction-pointer))
         (config! (select f [:#data-pointer]) :text (str data-pointer))
-        (config! (select f [:#buffer]) :text @output))
+        (config! (select f [:#buffer]) :text @output)
+        (scroll! (select f [:#buffer]) :to :bottom))
       (recur))))
