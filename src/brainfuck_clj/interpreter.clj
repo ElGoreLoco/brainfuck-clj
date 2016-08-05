@@ -54,13 +54,11 @@
   (fn-cell cell-data dec))
 
 (defn output-cell
-  "Print the character stored in the current cell."
+  "Return the character stored in the current cell."
   [cell-data]
   (let [cells (:cells cell-data)
         data-pointer (:data-pointer cell-data)]
-    (print (char (get cells data-pointer)))
-    (flush) ; If the program doesn't flush the output stream, characters will be displayed every once in a while.
-    cell-data))
+    (char (get cells data-pointer))))
 
 (defn- str->number
   "Take the first character of the string and convert it to a number."
@@ -91,7 +89,7 @@
   (merge program-data {:cell-data (f (:cell-data program-data))}))
 
 (defn run-given-instruction
-  [program-data instruction]
+  [program-data instruction output]
   (let [{:keys [instructions instruction-pointer loops cell-data]} program-data]
     (case instruction
       \+ (edit-cell-data program-data inc-cell)
@@ -108,25 +106,25 @@
              program-data
              (get (clojure.set/map-invert loops) instruction-pointer))
            program-data)
-      \. (do (output-cell cell-data) program-data)
+      \. (do (send output (fn [a] (str a (output-cell cell-data)))) program-data)
       \, (merge program-data {:cell-data (input-cell cell-data)})
       program-data)))
 
 (defn run-next-instruction
-  [program-data]
+  [program-data output]
   (let [{:keys [instructions instruction-pointer]} program-data
         current-instruction (nth instructions instruction-pointer)]
     (inc-instruction-pointer
-      (run-given-instruction program-data current-instruction))))
+      (run-given-instruction program-data current-instruction output))))
 
 (defn run-all-instructions
-  [program-data-ref program-paused]
+  [program-data-ref program-paused output]
   (loop []
     (if (not @program-paused)
       (dosync
         (if (< (:instruction-pointer @program-data-ref)
                (count (:instructions @program-data-ref)))
-          (alter program-data-ref run-next-instruction)
+          (alter program-data-ref run-next-instruction output)
           (if (not @program-paused) ; This is for not sending useless actions.
             (send program-paused (fn [a] true)))))
       (Thread/sleep 250))

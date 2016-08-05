@@ -4,7 +4,7 @@
   (:use [seesaw.core]))
 
 (defn make-ui
-  [program-data program-paused]
+  [program-data program-paused output]
 
   (declare f)
 
@@ -36,10 +36,12 @@
       :size [640 :by 480]
       :on-close :exit
       :content (vertical-panel
-                 :items [(text
-                           :text ""
-                           :multi-line? true
-                           :editable? false)
+                 :items [(scrollable
+                           (text
+                             :text ""
+                             :id :buffer
+                             :multi-line? true
+                             :editable? false))
                          (horizontal-panel
                            :items [(flow-panel
                                      :items [(button :text "+"
@@ -97,5 +99,6 @@
             {:keys [cells data-pointer]} cell-data]
         (config! (select f [:#cells]) :text (str cells))
         (config! (select f [:#instruction-pointer]) :text (str instruction-pointer))
-        (config! (select f [:#data-pointer]) :text (str data-pointer)))
+        (config! (select f [:#data-pointer]) :text (str data-pointer))
+        (config! (select f [:#buffer]) :text @output))
       (recur))))

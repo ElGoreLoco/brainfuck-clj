@@ -8,6 +8,7 @@
 
 (def program-data (ref nil))
 (def program-paused (agent true))
+(def output (agent ""))
 
 ;;;; Main
 
@@ -16,7 +17,7 @@
   (if (= 1 (count args))
     (do
       (a/setup-program-data program-data (slurp (first args)))
-      (ui/make-ui program-data program-paused)
-      (interpreter/run-all-instructions program-data program-paused))
+      (ui/make-ui program-data program-paused output)
+      (interpreter/run-all-instructions program-data program-paused output))
     (println "You should specify a filepath."))
   (shutdown-agents))
